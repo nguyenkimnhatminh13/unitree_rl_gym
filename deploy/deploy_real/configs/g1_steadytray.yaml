@@ -1,0 +1,48 @@
+control_dt: 0.005
+
+msg_type: "hg"
+imu_type: "pelvis"
+
+lowcmd_topic: "rt/lowcmd"
+lowstate_topic: "rt/lowstate"
+
+policy_path: "/home/nhatminh/vm/vmo_steadytray/exported/policy_9999.pt"
+
+# Real robot command ranges from remote controller sticks.
+max_cmd: [1.0, 0.4, 0.4]
+
+# SteadyTray policy config.
+num_actions: 29
+num_obs: 96
+control_decimation: 10
+encoder_seq_len: 32
+cmd_scale: [1.0, 1.0, 1.0]
+ang_vel_scale: 0.2
+dof_pos_scale: 1.0
+dof_vel_scale: 0.05
+action_scale: [0.548, 0.548, 0.548, 0.351, 0.351, 0.439, 0.548, 0.548, 0.439, 0.351, 0.351, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.439, 0.0745, 0.0745, 0.0745, 0.0745]
+default_angles: [-0.1, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.3, 0.0, 0.0, -0.2, -0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+kps: [40.2, 99.1, 40.2, 99.1, 28.5, 28.5, 40.2, 99.1, 40.2, 99.1, 28.5, 28.5, 40.2, 28.5, 28.5, 14.3, 14.3, 14.3, 14.3, 14.3, 16.8, 16.8, 14.3, 14.3, 14.3, 14.3, 14.3, 16.8, 16.8]
+kds: [2.56, 6.31, 2.56, 6.31, 1.81, 1.81, 2.56, 6.31, 2.56, 6.31, 1.81, 1.81, 2.56, 1.81, 1.81, 0.907, 0.907, 0.907, 0.907, 0.907, 1.07, 1.07, 0.907, 0.907, 0.907, 0.907, 0.907, 1.07, 1.07]
+
+# Mapping between SteadyTray policy order and robot motor order.
+policy_to_robot: [0, 3, 6, 9, 13, 17, 1, 4, 7, 10, 14, 18, 2, 5, 8, 11, 15, 19, 21, 23, 25, 27, 12, 16, 20, 22, 24, 26, 28]
+robot_to_policy: [0, 6, 12, 1, 7, 13, 2, 8, 14, 3, 9, 15, 22, 4, 10, 16, 23, 5, 11, 17, 24, 18, 25, 19, 26, 20, 27, 21, 28]
+
+# Real deployment has no object perception in this script.
+# Fallback object_obs is set to MuJoCo g1_tray_holder.xml initial object-top pose in d435 camera frame:
+# [x, y, z, qw, qx, qy, qz]
+distill_object_obs: [0.3203891, -0.01753, 0.0440797, 0.9149597, 0.0, -0.4035453, 0.0]
+
+# Optional live object pose topic for distillation policy.
+# If unavailable (or stale), distill_object_obs is used automatically.
+object_pose_topic: "/object_pose"
+object_pose_msg_type: ""
+object_pose_timeout_s: 0.5
+# Match deploy_mujoco.get_object_pose convention:
+# - final object_obs uses top-surface position + quaternion wxyz
+# - if incoming topic pose is object center, set object_pose_is_top_surface: false
+# - if topic quaternion is ROS style (x,y,z,w), keep object_pose_quat_order: "xyzw"
+object_pose_quat_order: "xyzw"
+object_pose_is_top_surface: false
+object_half_height: 0.05
