@@ -1,4 +1,4 @@
-control_dt: 0.005
+control_dt: 0.02
 
 msg_type: "hg"
 imu_type: "pelvis"
@@ -6,15 +6,20 @@ imu_type: "pelvis"
 lowcmd_topic: "rt/lowcmd"
 lowstate_topic: "rt/lowstate"
 
-policy_path: "/home/nhatminh/vm/vmo_steadytray/exported/policy_9999.pt"
+# Two checkpoints: "stable" (e.g. stage) vs main. From default pose: key_start_stable runs stable; A runs main.
+# While running: press A once to switch stable -> main; press key_start_stable once to switch main -> stable.
+policy_path_stable: "/home/nhatminh/vm/vmo_steadytray/output/exported/stage2.pt"
+policy_path: "/home/nhatminh/vm/vmo_steadytray/exported/policy_9999.onnx"
+# Remote button name: B, X, Y, R1, L1, F1, ... (see keymap_index_from_name in deploy_real_steadytray.py)
+key_start_stable: "B"
 
 # Real robot command ranges from remote controller sticks.
-max_cmd: [1.0, 0.4, 0.4]
+max_cmd: [0.7, 0.4, 0.4]
 
 # SteadyTray policy config.
 num_actions: 29
 num_obs: 96
-control_decimation: 10
+control_decimation: 1
 encoder_seq_len: 32
 cmd_scale: [1.0, 1.0, 1.0]
 ang_vel_scale: 0.2
@@ -29,20 +34,8 @@ kds: [2.56, 6.31, 2.56, 6.31, 1.81, 1.81, 2.56, 6.31, 2.56, 6.31, 1.81, 1.81, 2.
 policy_to_robot: [0, 3, 6, 9, 13, 17, 1, 4, 7, 10, 14, 18, 2, 5, 8, 11, 15, 19, 21, 23, 25, 27, 12, 16, 20, 22, 24, 26, 28]
 robot_to_policy: [0, 6, 12, 1, 7, 13, 2, 8, 14, 3, 9, 15, 22, 4, 10, 16, 23, 5, 11, 17, 24, 18, 25, 19, 26, 20, 27, 21, 28]
 
-# Real deployment has no object perception in this script.
-# Fallback object_obs is set to MuJoCo g1_tray_holder.xml initial object-top pose in d435 camera frame:
-# [x, y, z, qw, qx, qy, qz]
-distill_object_obs: [0.3203891, -0.01753, 0.0440797, 0.9149597, 0.0, -0.4035453, 0.0]
-
-# Optional live object pose topic for distillation policy.
-# If unavailable (or stale), distill_object_obs is used automatically.
-object_pose_topic: "/object_pose"
-object_pose_msg_type: ""
+# Distillation SteadyTray: object_obs is built from DDS object_pose only (no YAML fallback).
+# Run the sim/bridge with the same object_pose topic before starting; deploy blocks until first message.
+object_pose_topic: "rt/object_pose"
 object_pose_timeout_s: 0.5
-# Match deploy_mujoco.get_object_pose convention:
-# - final object_obs uses top-surface position + quaternion wxyz
-# - if incoming topic pose is object center, set object_pose_is_top_surface: false
-# - if topic quaternion is ROS style (x,y,z,w), keep object_pose_quat_order: "xyzw"
-object_pose_quat_order: "xyzw"
-object_pose_is_top_surface: false
-object_half_height: 0.05
+# object_obs from PoseStamped: [x, y, z, qw, qx, qy, qz]
